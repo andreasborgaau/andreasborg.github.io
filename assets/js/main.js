@@ -1,139 +1,101 @@
-/*
-	Transitive by TEMPLATED
-	templated.co @templatedco
-	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
-*/
+// Reproduction Rate
+let infRateSlider = document.getElementById("myRange1");
+let infRateOutput = document.getElementById("myRange1Value");
+let infRateName = document.getElementById("myRange1Name");
+infRateOutput.innerHTML = infRateSlider.value; 
+infRateName.innerHTML = "Reproduction Number";
+let infInputBar = document.getElementById("myRange1bar");
 
-(function($) {
+// Population
+let plpSlider = document.getElementById("myRange2");
+let plpOutput = document.getElementById("myRange2Value");
+let plpName = document.getElementById("myRange2Name");
+plpOutput.innerHTML =  plpSlider.value;
+plpName.innerHTML = "Population";
 
-	skel.breakpoints({
-		xlarge:	'(max-width: 1680px)',
-		large:	'(max-width: 1280px)',
-		medium:	'(max-width: 980px)',
-		small:	'(max-width: 736px)',
-		xsmall:	'(max-width: 480px)'
-	});
+// Initialize the graph
+chartShow(2);
 
-	$(function() {
+// Udate the curren input value (each time you type in it)
+infInputBar.oninput = function() {
+    infRateSlider.value = this.value;
+    infRateOutput.innerHTML = this.value;
 
-		var	$window = $(window),
-			$body = $('body'),
-			$header = $('#header'),
-			$banner = $('#banner');
+    chartShow(this.value);
+}
 
-		// Disable animations/transitions until the page has loaded.
-			$body.addClass('is-loading');
+// Update the current slider value (each time you drag the slider handle)
+infRateSlider.oninput = function() {
+    infInputBar.value = this.value;
+    infRateOutput.innerHTML = this.value;    
+    
+    chartShow(this.value);
+}
 
-			$window.on('load', function() {
-				window.setTimeout(function() {
-					$body.removeClass('is-loading');
-				}, 100);
-			});
+plpSlider.oninput = function() {
+    plpOutput.innerHTML = this.value;
+  }
 
-		// Prioritize "important" elements on medium.
-			skel.on('+medium -medium', function() {
-				$.prioritize(
-					'.important\\28 medium\\29',
-					skel.breakpoint('medium').active
-				);
-			});
+function changeText() {
+    document.getElementById("change").innerHTML = "Hejsa";
+}
 
-		// Fix: Placeholder polyfill.
-			$('form').placeholder();
+function chartShow(infTal){
+    var ctx = document.getElementById("myChart");
+    var data = {
+        labels: [1, infTal],
+        datasets: [{
+            label: "f(x) = x",
+            function: function(x) { return x },
+            borderColor: "blue",
+            data: [],
+            fill: false
+        },
+        {
+            label: "f(x) = x²",
+            function: function(x) { return x*x },
+            borderColor: "red",
+            data: [],
+            fill: false
+        },
+        {
+            label: "f(x) = x * log(x)",
+            function: function(x) { return x*Math.log(x) },
+            borderColor: "black",
+            data: [],
+            fill: false
+        }]
+    };
 
-		// Header.
-			if (skel.vars.IEVersion < 9)
-				$header.removeClass('alt');
+    Chart.pluginService.register({
+        beforeInit: function(chart) {
+            var data = chart.config.data;
+            for (var i = 0; i < data.datasets.length; i++) {
+                for (var j = 0; j < data.labels.length; j++) {
+                    var fct = data.datasets[i].function,
+                        x = data.labels[j],
+                        y = fct(x);
+                    data.datasets[i].data.push(y);
+                }
+            }
+        }
+    });
 
-			if ($banner.length > 0
-			&&	$header.hasClass('alt')) {
-
-				$window.on('resize', function() { $window.trigger('scroll'); });
-
-				$banner.scrollex({
-					bottom:		$header.outerHeight(),
-					terminate:	function() { $header.removeClass('alt'); },
-					enter:		function() { $header.addClass('alt'); },
-					leave:		function() { $header.removeClass('alt'); $header.addClass('reveal'); }
-				});
-
-			}
-
-		// Banner.
-
-			if ($banner.length > 0) {
-
-				// IE fix.
-					if (skel.vars.IEVersion < 12) {
-
-						$window.on('resize', function() {
-
-							var wh = $window.height() * 0.60,
-								bh = $banner.height();
-
-							$banner.css('height', 'auto');
-
-							window.setTimeout(function() {
-
-								if (bh < wh)
-									$banner.css('height', wh + 'px');
-
-							}, 0);
-
-						});
-
-						$window.on('load', function() {
-							$window.triggerHandler('resize');
-						});
-
-					}
-
-				// Video check.
-					var video = $banner.data('video');
-
-					if (video)
-						$window.on('load.banner', function() {
-
-							// Disable banner load event (so it doesn't fire again).
-								$window.off('load.banner');
-
-							// Append video if supported.
-								if (!skel.vars.mobile
-								&&	!skel.breakpoint('large').active
-								&&	skel.vars.IEVersion > 9)
-									$banner.append('<video autoplay loop><source src="' + video + '.mp4" type="video/mp4" /><source src="' + video + '.webm" type="video/webm" /></video>');
-
-						});
-
-				// More button.
-					$banner.find('.more')
-						.addClass('scrolly');
-
-			}
-
-		// Scrolly.
-			if ( $( ".scrolly" ).length ) {
-
-				var $height = $('#header').height() * 0.95;
-
-				$('.scrolly').scrolly({
-					offset: $height
-				});
-			}
-
-		// Menu.
-			$('#menu')
-				.append('<a href="#menu" class="close"></a>')
-				.appendTo($body)
-				.panel({
-					delay: 500,
-					hideOnClick: true,
-					hideOnSwipe: true,
-					resetScroll: true,
-					resetForms: true,
-					side: 'right'
-				});
-
-	});
-
-})(jQuery);
+    var myBarChart = new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: {
+            maintainAspectRatio: false,
+            animation: {
+                duration: 0
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            }
+        }
+    });
+}
